@@ -1,0 +1,22 @@
+.boulders-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  /* width: 640px;
+  height: 480px; */
+  pointer-events: none;
+  z-index: 2;
+}
+
+.boulder {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  opacity: 0.9;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}

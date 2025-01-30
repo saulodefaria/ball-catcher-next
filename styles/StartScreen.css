@@ -1,0 +1,65 @@
+.start-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 10;
+}
+
+.start-screen h1 {
+  color: #fff;
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.start-screen h2 {
+  color: #fff;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: normal;
+}
+
+.difficulty-select {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.difficulty-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 600px;
+}
+
+.difficulty-button {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: capitalize;
+  min-width: 120px;
+}
+
+.difficulty-button:hover {
+  transform: translateY(-2px);
+  filter: brightness(110%);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.difficulty-button:active {
+  transform: translateY(0);
+  filter: brightness(90%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
