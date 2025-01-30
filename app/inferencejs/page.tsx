@@ -27,7 +27,7 @@ export default function Home() {
     if (!modelLoading) {
       setModelLoading(true);
       inferEngine
-        .startWorker("distress-detection-a0xh3", 3, "rf_EsVTlbAbaZPLmAFuQwWoJgFpMU82")
+        .startWorker("distress-detection-a0xh3", 3, process.env.NEXT_PUBLIC_INFERENCEJS_API_KEY as string)
         .then((id: string) => setModelWorkerId(id));
     }
   }, [inferEngine, modelLoading]);
