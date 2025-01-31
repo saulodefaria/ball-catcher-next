@@ -1,5 +1,6 @@
 import "@/styles/StartScreen.css";
 import { GameSettings } from "@/types/settings.type";
+import { usePathname } from "next/navigation";
 
 const DIFFICULTY_SETTINGS: { [key: string]: GameSettings } = {
   easy: { spawnInterval: 1000, speed: 3, color: "#4CAF50" }, // Green
@@ -9,12 +10,14 @@ const DIFFICULTY_SETTINGS: { [key: string]: GameSettings } = {
 };
 
 const StartScreen = ({ onStart }: { onStart: (settings: GameSettings) => void }) => {
+  const pathname = usePathname();
+  const isInferenceJS = pathname.includes("inferencejs");
   return (
     <div className="start-screen">
-      <h1>Ball Catcher</h1>
-      <h2>Catch the balls before they hit the ground!</h2>
+      <h1 className="text-center">Ball Catcher{isInferenceJS ? " - InferenceJS" : ""}</h1>
+      <h2 className="text-center">Catch the balls before they hit the ground!</h2>
       <div className="difficulty-select">
-        <h3>Select Difficulty</h3>
+        <h3 className="text-white">Select Difficulty</h3>
         <div className="difficulty-buttons">
           {Object.entries(DIFFICULTY_SETTINGS).map(([level, settings]) => (
             <button
