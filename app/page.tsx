@@ -13,6 +13,7 @@ export default function Home() {
   const webcamRef = useRef<Webcam | null>(null);
   const [handPositions, setHandPositions] = useState<Prediction[]>([]);
   const [displaySize, setDisplaySize] = useState<{ width: number; height: number } | null>(null);
+  const [inferenceImageSize, setInferenceImageSize] = useState<{ width: number; height: number } | null>(null);
   const [gameSettings, setGameSettings] = useState<GameSettings | null>(null);
   const [score, setScore] = useState(0);
 
@@ -28,11 +29,14 @@ export default function Home() {
         const base64Frame = getFrameBase64();
         if (base64Frame) {
           const predictions = await getPrediction(base64Frame);
+          const adjustedWidth = inferenceImageSize?.width || 640;
+          const adjustedHeight = inferenceImageSize?.height || 480;
+
           const scaledPredictions = predictions.map((prediction: Prediction) => ({
-            x: (prediction.x * displaySize.width) / 640,
-            y: (prediction.y * displaySize.height) / 480,
-            width: (prediction.width * displaySize.width) / 640,
-            height: (prediction.height * displaySize.height) / 480,
+            x: ((adjustedWidth - (prediction.x + prediction.width)) * displaySize.width) / adjustedWidth,
+            y: (prediction.y * displaySize.height) / adjustedHeight,
+            width: (prediction.width * displaySize.width) / adjustedWidth,
+            height: (prediction.height * displaySize.height) / adjustedHeight,
           }));
           setHandPositions(scaledPredictions);
         }
@@ -48,7 +52,7 @@ export default function Home() {
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [displaySize]);
+  }, [displaySize, inferenceImageSize]);
 
   const handleStart = (settings: GameSettings) => {
     setGameSettings(settings);
@@ -71,8 +75,8 @@ export default function Home() {
     if (!video) return null;
 
     const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = 640;
-    tempCanvas.height = 480;
+    tempCanvas.width = inferenceImageSize?.width || 640;
+    tempCanvas.height = inferenceImageSize?.height || 480;
 
     const ctx = tempCanvas.getContext("2d");
     if (!ctx) return null;
@@ -88,7 +92,12 @@ export default function Home() {
   return (
     <div className="App">
       <div className="game-container">
-        <CameraFeed ref={webcamRef} onDisplaySize={handleDisplaySize} />
+        <CameraFeed
+          ref={webcamRef}
+          onDisplaySize={handleDisplaySize}
+          displaySize={displaySize}
+          setInferenceImageSize={setInferenceImageSize}
+        />
         {gameSettings && displaySize ? (
           <>
             <Boulders

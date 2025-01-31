@@ -46,10 +46,10 @@ export default function Home() {
           const predictions = await inferEngine.infer(modelWorkerId, img);
 
           const scaledPredictions = predictions.map((prediction: InferencejsPrediction) => ({
-            x: ((640 - (prediction.bbox.x + prediction.bbox.width)) * displaySize.width) / 640,
-            y: (prediction.bbox.y * displaySize.height) / 480,
-            width: (prediction.bbox.width * displaySize.width) / 640,
-            height: (prediction.bbox.height * displaySize.height) / 480,
+            x: displaySize.width - (prediction.bbox.x + prediction.bbox.width),
+            y: prediction.bbox.y,
+            width: prediction.bbox.width,
+            height: prediction.bbox.height,
           }));
 
           setHandPositions(scaledPredictions);
@@ -86,7 +86,7 @@ export default function Home() {
   return (
     <div className="App">
       <div className="game-container">
-        <CameraFeed ref={webcamRef} onDisplaySize={handleDisplaySize} />
+        <CameraFeed ref={webcamRef} onDisplaySize={handleDisplaySize} displaySize={displaySize} />
         {gameSettings && displaySize ? (
           <>
             <Boulders

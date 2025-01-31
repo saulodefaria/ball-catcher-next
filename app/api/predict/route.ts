@@ -24,13 +24,7 @@ export async function POST(request: Request) {
     const predictionsData = await response.json();
     const predictions: Prediction[] = predictionsData.outputs[0].model_all.predictions;
 
-    // Mirror the x coordinates before returning
-    const mirroredPredictions = predictions.map((pred: Prediction) => ({
-      ...pred,
-      x: 640 - (pred.x + pred.width), // Mirror x coordinate
-    }));
-
-    return NextResponse.json(mirroredPredictions);
+    return NextResponse.json(predictions);
   } catch (error) {
     console.error("Prediction error:", error);
     return NextResponse.json({ error: "Failed to get prediction" }, { status: 500 });
