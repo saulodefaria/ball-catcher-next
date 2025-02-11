@@ -1,12 +1,12 @@
 "use client";
 
-import Boulders from "@/components/Boulder";
-import CameraFeed from "@/components/CameraFeed";
-import StartScreen from "@/components/StartScreen";
+import Boulders from "@/src/components/Boulder";
+import CameraFeed from "@/src/components/CameraFeed";
+import StartScreen from "@/src/components/StartScreen";
 import { useState, useEffect, useRef } from "react";
-import { getPrediction } from "@/services/inference.service";
-import { Prediction } from "@/types/inference.type";
-import { GameSettings } from "@/types/settings.type";
+import { getPrediction } from "@/src/services/inference.service";
+import { Prediction } from "@/src/types/inference.type";
+import { GameSettings } from "@/src/types/settings.type";
 import Webcam from "react-webcam";
 
 export default function Home() {

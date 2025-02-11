@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "../styles/CountdownTimer.css";
+import "@/src/styles/CountdownTimer.css";
 
 interface CountdownTimerProps {
   onComplete: () => void;

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Prediction } from "@/types/inference.type";
+import { Prediction } from "@/src/types/inference.type";
 
 export async function POST(request: Request) {
   try {

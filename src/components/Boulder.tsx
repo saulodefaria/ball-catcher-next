@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, Dispatch, SetStateAction } from "react";
-import "@/styles/Boulder.css";
-import { Prediction } from "@/types/inference.type";
-import { GameSettings } from "@/types/settings.type";
+import "@/src/styles/Boulder.css";
+import { Prediction } from "@/src/types/inference.type";
+import { GameSettings } from "@/src/types/settings.type";
 
 const BOULDER_SIZE = 50; // pixels
 

@@ -1,5 +1,5 @@
-import "@/styles/StartScreen.css";
-import { GameSettings } from "@/types/settings.type";
+import "@/src/styles/StartScreen.css";
+import { GameSettings } from "@/src/types/settings.type";
 
 const DIFFICULTY_SETTINGS: { [key: string]: GameSettings } = {
   easy: { spawnInterval: 1000, speed: 3, color: "#4CAF50" }, // Green

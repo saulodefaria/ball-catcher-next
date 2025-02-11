@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useRef, useLayoutEffect } from "react";
 import Webcam from "react-webcam";
-import "@/styles/CameraFeed.css";
+import "@/src/styles/CameraFeed.css";
 
 interface CameraFeedProps {
   onDisplaySize: (size: { width: number; height: number }) => void;

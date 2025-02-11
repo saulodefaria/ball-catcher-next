@@ -1,15 +1,15 @@
 "use client";
 
-import Boulders from "@/components/Boulder";
-import CameraFeed from "@/components/CameraFeed";
-import StartScreen from "@/components/StartScreen";
+import Boulders from "@/src/components/Boulder";
+import CameraFeed from "@/src/components/CameraFeed";
+import StartScreen from "@/src/components/StartScreen";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { GameSettings } from "@/types/settings.type";
+import { GameSettings } from "@/src/types/settings.type";
 import Webcam from "react-webcam";
 import { InferenceEngine, CVImage } from "inferencejs";
-import { Prediction } from "@/types/inference.type";
-import { InferencejsPrediction } from "@/types/inference.type";
-import CountdownTimer from "@/components/CountdownTimer";
+import { Prediction } from "@/src/types/inference.type";
+import { InferencejsPrediction } from "@/src/types/inference.type";
+import CountdownTimer from "@/src/components/CountdownTimer";
 
 export default function Home() {
   const inferEngine = useMemo(() => {
