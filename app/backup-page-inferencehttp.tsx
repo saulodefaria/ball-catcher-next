@@ -104,7 +104,7 @@ export default function Home() {
               handPositions={handPositions}
               displaySize={displaySize}
               gameSettings={gameSettings}
-              onScoreUpdate={setScore}
+              setScore={setScore}
             />
             <button className="exit-button" onClick={handleExit}>
               Exit
