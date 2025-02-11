@@ -3,19 +3,34 @@
 import Boulders from "@/components/Boulder";
 import CameraFeed from "@/components/CameraFeed";
 import StartScreen from "@/components/StartScreen";
-import { useState, useEffect, useRef } from "react";
-import { getPrediction } from "@/services/inference.service";
-import { Prediction } from "@/types/inference.type";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { GameSettings } from "@/types/settings.type";
 import Webcam from "react-webcam";
+import { InferenceEngine, CVImage } from "inferencejs";
+import { Prediction } from "@/types/inference.type";
+import { InferencejsPrediction } from "@/types/inference.type";
 
 export default function Home() {
+  const inferEngine = useMemo(() => {
+    return new InferenceEngine();
+  }, []);
+
   const webcamRef = useRef<Webcam | null>(null);
+  const [modelWorkerId, setModelWorkerId] = useState<string | null>(null);
+  const [modelLoading, setModelLoading] = useState(false);
   const [handPositions, setHandPositions] = useState<Prediction[]>([]);
   const [displaySize, setDisplaySize] = useState<{ width: number; height: number } | null>(null);
-  const [inferenceImageSize, setInferenceImageSize] = useState<{ width: number; height: number } | null>(null);
   const [gameSettings, setGameSettings] = useState<GameSettings | null>(null);
   const [score, setScore] = useState(0);
+
+  useEffect(() => {
+    if (!modelLoading) {
+      setModelLoading(true);
+      inferEngine
+        .startWorker("distress-detection-a0xh3", 3, process.env.NEXT_PUBLIC_INFERENCEJS_API_KEY as string)
+        .then((id: string) => setModelWorkerId(id));
+    }
+  }, [inferEngine, modelLoading]);
 
   useEffect(() => {
     if (!displaySize) return;
@@ -25,20 +40,21 @@ export default function Home() {
     let lastFrameTime = 0;
 
     const processFrame = async (timestamp: number) => {
-      if (timestamp - lastFrameTime >= frameInterval) {
-        const base64Frame = getFrameBase64();
-        if (base64Frame) {
-          const predictions = await getPrediction(base64Frame);
-          const adjustedWidth = inferenceImageSize?.width || 640;
-          const adjustedHeight = inferenceImageSize?.height || 480;
+      if (timestamp - lastFrameTime >= frameInterval && modelWorkerId) {
+        try {
+          const img = new CVImage(webcamRef.current?.video || null);
+          const predictions = await inferEngine.infer(modelWorkerId, img);
 
-          const scaledPredictions = predictions.map((prediction: Prediction) => ({
-            x: ((adjustedWidth - (prediction.x + prediction.width)) * displaySize.width) / adjustedWidth,
-            y: (prediction.y * displaySize.height) / adjustedHeight,
-            width: (prediction.width * displaySize.width) / adjustedWidth,
-            height: (prediction.height * displaySize.height) / adjustedHeight,
+          const scaledPredictions = predictions.map((prediction: InferencejsPrediction) => ({
+            x: displaySize.width - (prediction.bbox.x + prediction.bbox.width),
+            y: prediction.bbox.y,
+            width: prediction.bbox.width,
+            height: prediction.bbox.height,
           }));
+
           setHandPositions(scaledPredictions);
+        } catch (error) {
+          console.error("Inference error:", error);
         }
         lastFrameTime = timestamp;
       }
@@ -52,7 +68,7 @@ export default function Home() {
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [displaySize, inferenceImageSize]);
+  }, [displaySize, modelWorkerId, inferEngine]);
 
   const handleStart = (settings: GameSettings) => {
     setGameSettings(settings);
@@ -67,37 +83,10 @@ export default function Home() {
     setDisplaySize(size);
   };
 
-  const getFrameBase64 = () => {
-    if (!webcamRef.current) return null;
-
-    // Get the actual video element from the Webcam component
-    const video = webcamRef.current.video;
-    if (!video) return null;
-
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = inferenceImageSize?.width || 640;
-    tempCanvas.height = inferenceImageSize?.height || 480;
-
-    const ctx = tempCanvas.getContext("2d");
-    if (!ctx) return null;
-
-    // Draw from the video element instead of the ref directly
-    ctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
-
-    // Get base64 string (removing the data:image/png;base64, prefix)
-    const base64String = tempCanvas.toDataURL("image/jpeg", 0.8).split(",")[1];
-    return base64String;
-  };
-
   return (
     <div className="App">
       <div className="game-container">
-        <CameraFeed
-          ref={webcamRef}
-          onDisplaySize={handleDisplaySize}
-          displaySize={displaySize}
-          setInferenceImageSize={setInferenceImageSize}
-        />
+        <CameraFeed ref={webcamRef} onDisplaySize={handleDisplaySize} displaySize={displaySize} />
         {gameSettings && displaySize ? (
           <>
             <Boulders

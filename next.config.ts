@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  redirects: async () => {
+    return [
+      {
+        source: "/inferencejs",
+        destination: "/",
+        permanent: true, // Set to false for temporary (307) redirect
+      },
+    ];
+  },
 };
 
 export default nextConfig;
