@@ -1,6 +1,7 @@
 declare module "inferencejs" {
   export class InferenceEngine {
     startWorker(modelId: string, numThreads: number, apiKey: string): Promise<string>;
+    stopWorker(workerId: string): Promise<boolean>;
     infer(workerId: string, image: CVImage): Promise<any[]>;
   }
 

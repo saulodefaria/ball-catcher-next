@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, Dispatch, SetStateAction } from "react";
 import "@/styles/Boulder.css";
 import { Prediction } from "@/types/inference.type";
 import { GameSettings } from "@/types/settings.type";
@@ -45,15 +45,14 @@ const Boulders = ({
   handPositions,
   displaySize,
   gameSettings,
-  onScoreUpdate,
+  setScore,
 }: {
   handPositions: Prediction[];
   displaySize: { width: number; height: number };
   gameSettings: GameSettings;
-  onScoreUpdate: (score: number) => void;
+  setScore: Dispatch<SetStateAction<number>>;
 }) => {
   const [boulders, setBoulders] = useState<{ id: number; x: number; y: number }[]>([]);
-  const [, setScore] = useState(0);
 
   // Handle boulder spawning and movement
   useEffect(() => {
@@ -108,11 +107,7 @@ const Boulders = ({
 
           if (checkCollision(handObj, boulderObj)) {
             setBoulders((prev) => prev.filter((b) => b.id !== boulder.id));
-            setScore((prev) => {
-              const newScore = prev + 1;
-              onScoreUpdate(newScore);
-              return newScore;
-            });
+            setScore((prev) => prev + 1);
           }
         });
       });

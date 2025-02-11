@@ -9,6 +9,7 @@ import Webcam from "react-webcam";
 import { InferenceEngine, CVImage } from "inferencejs";
 import { Prediction } from "@/types/inference.type";
 import { InferencejsPrediction } from "@/types/inference.type";
+import CountdownTimer from "@/components/CountdownTimer";
 
 export default function Home() {
   const inferEngine = useMemo(() => {
@@ -22,15 +23,27 @@ export default function Home() {
   const [displaySize, setDisplaySize] = useState<{ width: number; height: number } | null>(null);
   const [gameSettings, setGameSettings] = useState<GameSettings | null>(null);
   const [score, setScore] = useState(0);
+  const [isCountingDown, setIsCountingDown] = useState(false);
+  const [isGameActive, setIsGameActive] = useState(false);
 
+  // Load the model when the countdown starts
   useEffect(() => {
-    if (!modelLoading) {
+    if (isCountingDown && !modelWorkerId && !modelLoading) {
       setModelLoading(true);
       inferEngine
         .startWorker("distress-detection-a0xh3", 3, process.env.NEXT_PUBLIC_INFERENCEJS_API_KEY as string)
         .then((id: string) => setModelWorkerId(id));
     }
-  }, [inferEngine, modelLoading]);
+  }, [inferEngine, modelLoading, modelWorkerId, isCountingDown]);
+
+  // Stop the model when the game is over
+  useEffect(() => {
+    if (!isGameActive && modelWorkerId) {
+      inferEngine.stopWorker(modelWorkerId);
+      setModelWorkerId(null);
+      setModelLoading(false);
+    }
+  }, [isGameActive, modelWorkerId, inferEngine]);
 
   useEffect(() => {
     if (!displaySize) return;
@@ -73,10 +86,17 @@ export default function Home() {
   const handleStart = (settings: GameSettings) => {
     setGameSettings(settings);
     setScore(0);
+    setIsCountingDown(true);
+  };
+
+  const handleCountdownComplete = () => {
+    setIsCountingDown(false);
+    setIsGameActive(true);
   };
 
   const handleExit = () => {
     setGameSettings(null);
+    setIsGameActive(false);
   };
 
   const handleDisplaySize = (size: { width: number; height: number }) => {
@@ -89,12 +109,15 @@ export default function Home() {
         <CameraFeed ref={webcamRef} onDisplaySize={handleDisplaySize} displaySize={displaySize} />
         {gameSettings && displaySize ? (
           <>
-            <Boulders
-              handPositions={handPositions}
-              displaySize={displaySize}
-              gameSettings={gameSettings}
-              onScoreUpdate={setScore}
-            />
+            {isCountingDown && <CountdownTimer onComplete={handleCountdownComplete} />}
+            {isGameActive && (
+              <Boulders
+                handPositions={handPositions}
+                displaySize={displaySize}
+                gameSettings={gameSettings}
+                setScore={setScore}
+              />
+            )}
             <button className="exit-button" onClick={handleExit}>
               Exit
             </button>
