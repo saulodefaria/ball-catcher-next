@@ -2,10 +2,34 @@ import "@/src/styles/StartScreen.css";
 import { GameSettings } from "@/src/types/settings.type";
 
 const DIFFICULTY_SETTINGS: { [key: string]: GameSettings } = {
-  easy: { spawnInterval: 1000, speed: 3, color: "#4CAF50", initialLives: 5 }, // Green
-  medium: { spawnInterval: 500, speed: 5, color: "#2196F3", initialLives: 5 }, // Blue
-  hard: { spawnInterval: 300, speed: 7, color: "#FF9800", initialLives: 5 }, // Orange
-  extreme: { spawnInterval: 200, speed: 10, color: "#f44336", initialLives: 5 }, // Red
+  easy: {
+    spawnInterval: 1000,
+    speed: 3,
+    color: "#4CAF50",
+    initialLives: 5,
+    heartSpawnInterval: 5000, // 5 seconds
+  },
+  medium: {
+    spawnInterval: 500,
+    speed: 5,
+    color: "#2196F3",
+    initialLives: 5,
+    heartSpawnInterval: 5000, // 5 seconds
+  },
+  hard: {
+    spawnInterval: 300,
+    speed: 7,
+    color: "#FF9800",
+    initialLives: 5,
+    heartSpawnInterval: 10000, // 10 seconds
+  },
+  extreme: {
+    spawnInterval: 200,
+    speed: 10,
+    color: "#f44336",
+    initialLives: 5,
+    heartSpawnInterval: 10000, // 10 seconds
+  },
 };
 
 const StartScreen = ({ onStart }: { onStart: (settings: GameSettings) => void }) => {

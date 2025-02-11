@@ -3,4 +3,5 @@ export type GameSettings = {
   speed: number;
   color: string;
   initialLives: number;
+  heartSpawnInterval: number;
 };

@@ -4,6 +4,7 @@ import { Prediction } from "@/src/types/inference.type";
 import { GameSettings } from "@/src/types/settings.type";
 
 const BOULDER_SIZE = 50; // pixels
+const HEART_SIZE = 50; // pixels
 
 const BOULDER_COLORS = ["red", "blue", "green"];
 
@@ -21,6 +22,24 @@ const Boulder = ({ x, y }: { x: number; y: number }) => {
         backgroundImage: `url('/${color}.png')`,
         backgroundSize: "cover",
         backgroundColor: "transparent",
+      }}
+    />
+  );
+};
+
+const Heart = ({ x, y }: { x: number; y: number }) => {
+  return (
+    <div
+      className="heart"
+      style={{
+        left: x,
+        top: y,
+        width: HEART_SIZE,
+        height: HEART_SIZE,
+        backgroundImage: "url('/heart.png')",
+        backgroundSize: "cover",
+        backgroundColor: "transparent",
+        position: "absolute",
       }}
     />
   );
@@ -59,6 +78,7 @@ const Boulders = ({
   onGameOver: () => void;
 }) => {
   const [boulders, setBoulders] = useState<{ id: number; x: number; y: number }[]>([]);
+  const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
 
   // Handle boulder spawning and movement
   useEffect(() => {
@@ -92,6 +112,36 @@ const Boulders = ({
     };
   }, [gameSettings, displaySize]);
 
+  // Add heart spawning
+  useEffect(() => {
+    if (!gameSettings) return;
+
+    const heartSpawnInterval = setInterval(() => {
+      setHearts((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          x: Math.random() * (displaySize.width - HEART_SIZE - 40),
+          y: 0,
+        },
+      ]);
+    }, gameSettings.heartSpawnInterval);
+
+    // Move hearts
+    const moveInterval = setInterval(() => {
+      setHearts((prev) => {
+        return prev
+          .map((heart) => ({ ...heart, y: heart.y + gameSettings.speed * 0.7 })) // Hearts fall slower
+          .filter((heart) => heart.y < displaySize.height + HEART_SIZE);
+      });
+    }, 30);
+
+    return () => {
+      clearInterval(heartSpawnInterval);
+      clearInterval(moveInterval);
+    };
+  }, [gameSettings, displaySize]);
+
   // Update collision detection with scaled coordinates
   useEffect(() => {
     if (handPositions && handPositions.length > 0) {
@@ -116,9 +166,24 @@ const Boulders = ({
             setScore((prev) => prev + 1);
           }
         });
+
+        // Check heart collisions
+        hearts.forEach((heart) => {
+          const heartObj = {
+            x: heart.x,
+            y: heart.y,
+            width: HEART_SIZE,
+            height: HEART_SIZE,
+          };
+
+          if (checkCollision(handObj, heartObj)) {
+            setHearts((prev) => prev.filter((h) => h.id !== heart.id));
+            setLives((prev) => Math.min(prev + 1, 5)); // Cap at 5 lives
+          }
+        });
       });
     }
-  }, [handPositions, boulders, displaySize]);
+  }, [handPositions, boulders, hearts, displaySize]);
 
   // Life reduction when boulder hits bottom
   useEffect(() => {
@@ -135,6 +200,9 @@ const Boulders = ({
     <div className="boulders-container">
       {boulders.map((boulder) => (
         <Boulder key={boulder.id} x={boulder.x} y={boulder.y} />
+      ))}
+      {hearts.map((heart) => (
+        <Heart key={heart.id} x={heart.x} y={heart.y} />
       ))}
       {process.env.NEXT_PUBLIC_DEBUG === "true" &&
         handPositions?.map((hand, i) => (
