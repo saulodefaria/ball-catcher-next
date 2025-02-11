@@ -46,11 +46,17 @@ const Boulders = ({
   displaySize,
   gameSettings,
   setScore,
+  lives,
+  setLives,
+  onGameOver,
 }: {
   handPositions: Prediction[];
   displaySize: { width: number; height: number };
   gameSettings: GameSettings;
   setScore: Dispatch<SetStateAction<number>>;
+  lives: number;
+  setLives: Dispatch<SetStateAction<number>>;
+  onGameOver: () => void;
 }) => {
   const [boulders, setBoulders] = useState<{ id: number; x: number; y: number }[]>([]);
 
@@ -72,11 +78,11 @@ const Boulders = ({
 
     // Move existing boulders
     const moveInterval = setInterval(() => {
-      setBoulders((prev: { id: number; x: number; y: number }[]) =>
-        prev
+      setBoulders((prev: { id: number; x: number; y: number }[]) => {
+        return prev
           .map((boulder) => ({ ...boulder, y: boulder.y + gameSettings.speed }))
-          .filter((boulder) => boulder.y < displaySize.height)
-      );
+          .filter((boulder) => boulder.y < displaySize.height + BOULDER_SIZE);
+      });
     }, 30);
 
     // Cleanup both intervals
@@ -113,6 +119,17 @@ const Boulders = ({
       });
     }
   }, [handPositions, boulders, displaySize]);
+
+  // Life reduction when boulder hits bottom
+  useEffect(() => {
+    if (boulders.some((boulder) => boulder.y >= displaySize.height)) {
+      setLives((prev) => Math.max(0, prev - 1));
+      setBoulders((prev) => prev.filter((boulder) => boulder.y < displaySize.height));
+      if (lives <= 0) {
+        onGameOver();
+      }
+    }
+  }, [boulders, displaySize, lives, onGameOver]);
 
   return (
     <div className="boulders-container">

@@ -25,6 +25,8 @@ export default function Home() {
   const [score, setScore] = useState(0);
   const [isCountingDown, setIsCountingDown] = useState(false);
   const [isGameActive, setIsGameActive] = useState(false);
+  const [lives, setLives] = useState(0);
+  const [gameOver, setGameOver] = useState(false);
 
   // Load the model when the countdown starts
   useEffect(() => {
@@ -86,6 +88,8 @@ export default function Home() {
   const handleStart = (settings: GameSettings) => {
     setGameSettings(settings);
     setScore(0);
+    setLives(settings.initialLives);
+    setGameOver(false);
     setIsCountingDown(true);
   };
 
@@ -94,9 +98,15 @@ export default function Home() {
     setIsGameActive(true);
   };
 
+  const handleGameOver = () => {
+    setGameOver(true);
+    setIsGameActive(false);
+  };
+
   const handleExit = () => {
     setGameSettings(null);
     setIsGameActive(false);
+    setGameOver(false);
   };
 
   const handleDisplaySize = (size: { width: number; height: number }) => {
@@ -110,18 +120,33 @@ export default function Home() {
         {gameSettings && displaySize ? (
           <>
             {isCountingDown && <CountdownTimer onComplete={handleCountdownComplete} />}
-            {isGameActive && (
-              <Boulders
-                handPositions={handPositions}
-                displaySize={displaySize}
-                gameSettings={gameSettings}
-                setScore={setScore}
-              />
+            {gameOver ? (
+              <div className="game-over-overlay">
+                <div className="game-over-content">
+                  <h2>Game Over!</h2>
+                  <p>Final Score: {score}</p>
+                  <button onClick={() => handleStart(gameSettings)}>Play Again</button>
+                  <button onClick={handleExit}>Exit</button>
+                </div>
+              </div>
+            ) : (
+              isGameActive && (
+                <Boulders
+                  handPositions={handPositions}
+                  displaySize={displaySize}
+                  gameSettings={gameSettings}
+                  setScore={setScore}
+                  lives={lives}
+                  setLives={setLives}
+                  onGameOver={handleGameOver}
+                />
+              )
             )}
             <button className="exit-button" onClick={handleExit}>
               Exit
             </button>
             <div className="score">Score: {score}</div>
+            <div className="lives">Lives: {lives}</div>
           </>
         ) : (
           <StartScreen onStart={handleStart} />
