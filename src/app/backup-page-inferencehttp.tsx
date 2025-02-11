@@ -1,120 +1,122 @@
-"use client";
+// Backup code for inference via http
 
-import Boulders from "@/src/components/Boulder";
-import CameraFeed from "@/src/components/CameraFeed";
-import StartScreen from "@/src/components/StartScreen";
-import { useState, useEffect, useRef } from "react";
-import { getPrediction } from "@/src/services/inference.service";
-import { Prediction } from "@/src/types/inference.type";
-import { GameSettings } from "@/src/types/settings.type";
-import Webcam from "react-webcam";
+// "use client";
 
-export default function Home() {
-  const webcamRef = useRef<Webcam | null>(null);
-  const [handPositions, setHandPositions] = useState<Prediction[]>([]);
-  const [displaySize, setDisplaySize] = useState<{ width: number; height: number } | null>(null);
-  const [inferenceImageSize, setInferenceImageSize] = useState<{ width: number; height: number } | null>(null);
-  const [gameSettings, setGameSettings] = useState<GameSettings | null>(null);
-  const [score, setScore] = useState(0);
+// import Boulders from "@/src/components/Boulder";
+// import CameraFeed from "@/src/components/CameraFeed";
+// import StartScreen from "@/src/components/StartScreen";
+// import { useState, useEffect, useRef } from "react";
+// import { getPrediction } from "@/src/services/inference.service";
+// import { Prediction } from "@/src/types/inference.type";
+// import { GameSettings } from "@/src/types/settings.type";
+// import Webcam from "react-webcam";
 
-  useEffect(() => {
-    if (!displaySize) return;
+// export default function Home() {
+//   const webcamRef = useRef<Webcam | null>(null);
+//   const [handPositions, setHandPositions] = useState<Prediction[]>([]);
+//   const [displaySize, setDisplaySize] = useState<{ width: number; height: number } | null>(null);
+//   const [inferenceImageSize, setInferenceImageSize] = useState<{ width: number; height: number } | null>(null);
+//   const [gameSettings, setGameSettings] = useState<GameSettings | null>(null);
+//   const [score, setScore] = useState(0);
 
-    const frameInterval = 1000 / 30; // 30 FPS
-    let animationFrameId: number;
-    let lastFrameTime = 0;
+//   useEffect(() => {
+//     if (!displaySize) return;
 
-    const processFrame = async (timestamp: number) => {
-      if (timestamp - lastFrameTime >= frameInterval) {
-        const base64Frame = getFrameBase64();
-        if (base64Frame) {
-          const predictions = await getPrediction(base64Frame);
-          const adjustedWidth = inferenceImageSize?.width || 640;
-          const adjustedHeight = inferenceImageSize?.height || 480;
+//     const frameInterval = 1000 / 30; // 30 FPS
+//     let animationFrameId: number;
+//     let lastFrameTime = 0;
 
-          const scaledPredictions = predictions.map((prediction: Prediction) => ({
-            x: ((adjustedWidth - (prediction.x + prediction.width)) * displaySize.width) / adjustedWidth,
-            y: (prediction.y * displaySize.height) / adjustedHeight,
-            width: (prediction.width * displaySize.width) / adjustedWidth,
-            height: (prediction.height * displaySize.height) / adjustedHeight,
-          }));
-          setHandPositions(scaledPredictions);
-        }
-        lastFrameTime = timestamp;
-      }
-      animationFrameId = requestAnimationFrame(processFrame);
-    };
+//     const processFrame = async (timestamp: number) => {
+//       if (timestamp - lastFrameTime >= frameInterval) {
+//         const base64Frame = getFrameBase64();
+//         if (base64Frame) {
+//           const predictions = await getPrediction(base64Frame);
+//           const adjustedWidth = inferenceImageSize?.width || 640;
+//           const adjustedHeight = inferenceImageSize?.height || 480;
 
-    animationFrameId = requestAnimationFrame(processFrame);
+//           const scaledPredictions = predictions.map((prediction: Prediction) => ({
+//             x: ((adjustedWidth - (prediction.x + prediction.width)) * displaySize.width) / adjustedWidth,
+//             y: (prediction.y * displaySize.height) / adjustedHeight,
+//             width: (prediction.width * displaySize.width) / adjustedWidth,
+//             height: (prediction.height * displaySize.height) / adjustedHeight,
+//           }));
+//           setHandPositions(scaledPredictions);
+//         }
+//         lastFrameTime = timestamp;
+//       }
+//       animationFrameId = requestAnimationFrame(processFrame);
+//     };
 
-    return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-    };
-  }, [displaySize, inferenceImageSize]);
+//     animationFrameId = requestAnimationFrame(processFrame);
 
-  const handleStart = (settings: GameSettings) => {
-    setGameSettings(settings);
-    setScore(0);
-  };
+//     return () => {
+//       if (animationFrameId) {
+//         cancelAnimationFrame(animationFrameId);
+//       }
+//     };
+//   }, [displaySize, inferenceImageSize]);
 
-  const handleExit = () => {
-    setGameSettings(null);
-  };
+//   const handleStart = (settings: GameSettings) => {
+//     setGameSettings(settings);
+//     setScore(0);
+//   };
 
-  const handleDisplaySize = (size: { width: number; height: number }) => {
-    setDisplaySize(size);
-  };
+//   const handleExit = () => {
+//     setGameSettings(null);
+//   };
 
-  const getFrameBase64 = () => {
-    if (!webcamRef.current) return null;
+//   const handleDisplaySize = (size: { width: number; height: number }) => {
+//     setDisplaySize(size);
+//   };
 
-    // Get the actual video element from the Webcam component
-    const video = webcamRef.current.video;
-    if (!video) return null;
+//   const getFrameBase64 = () => {
+//     if (!webcamRef.current) return null;
 
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = inferenceImageSize?.width || 640;
-    tempCanvas.height = inferenceImageSize?.height || 480;
+//     // Get the actual video element from the Webcam component
+//     const video = webcamRef.current.video;
+//     if (!video) return null;
 
-    const ctx = tempCanvas.getContext("2d");
-    if (!ctx) return null;
+//     const tempCanvas = document.createElement("canvas");
+//     tempCanvas.width = inferenceImageSize?.width || 640;
+//     tempCanvas.height = inferenceImageSize?.height || 480;
 
-    // Draw from the video element instead of the ref directly
-    ctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+//     const ctx = tempCanvas.getContext("2d");
+//     if (!ctx) return null;
 
-    // Get base64 string (removing the data:image/png;base64, prefix)
-    const base64String = tempCanvas.toDataURL("image/jpeg", 0.8).split(",")[1];
-    return base64String;
-  };
+//     // Draw from the video element instead of the ref directly
+//     ctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
 
-  return (
-    <div className="App">
-      <div className="game-container">
-        <CameraFeed
-          ref={webcamRef}
-          onDisplaySize={handleDisplaySize}
-          displaySize={displaySize}
-          setInferenceImageSize={setInferenceImageSize}
-        />
-        {gameSettings && displaySize ? (
-          <>
-            <Boulders
-              handPositions={handPositions}
-              displaySize={displaySize}
-              gameSettings={gameSettings}
-              setScore={setScore}
-            />
-            <button className="exit-button" onClick={handleExit}>
-              Exit
-            </button>
-            <div className="score">Score: {score}</div>
-          </>
-        ) : (
-          <StartScreen onStart={handleStart} />
-        )}
-      </div>
-    </div>
-  );
-}
+//     // Get base64 string (removing the data:image/png;base64, prefix)
+//     const base64String = tempCanvas.toDataURL("image/jpeg", 0.8).split(",")[1];
+//     return base64String;
+//   };
+
+//   return (
+//     <div className="App">
+//       <div className="game-container">
+//         <CameraFeed
+//           ref={webcamRef}
+//           onDisplaySize={handleDisplaySize}
+//           displaySize={displaySize}
+//           setInferenceImageSize={setInferenceImageSize}
+//         />
+//         {gameSettings && displaySize ? (
+//           <>
+//             <Boulders
+//               handPositions={handPositions}
+//               displaySize={displaySize}
+//               gameSettings={gameSettings}
+//               setScore={setScore}
+//             />
+//             <button className="exit-button" onClick={handleExit}>
+//               Exit
+//             </button>
+//             <div className="score">Score: {score}</div>
+//           </>
+//         ) : (
+//           <StartScreen onStart={handleStart} />
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
