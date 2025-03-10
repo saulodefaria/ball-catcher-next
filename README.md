@@ -6,6 +6,8 @@ An interactive game that uses computer vision to detect hand movements and catch
 
 Test the app at: https://catch.saulofaria.com/
 
+Here's a quick demo in video: [Click here](https://www.loom.com/share/1dd3c0434f2e4cdd998974a5ced44f15?sid=6818d17d-1384-40a8-81f8-da972e41fbe1)
+
 ## Prerequisites
 
 - Node.js 18 or higher
